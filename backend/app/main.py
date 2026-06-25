@@ -176,6 +176,7 @@ async def lifespan(app: FastAPI):
             import app.models.agent_credential  # noqa
             import app.models.okr            # noqa
             import app.models.onboarding     # noqa
+            import app.models.agent_team     # noqa
 
             import app.models.identity       # noqa
             async with engine.begin() as conn:
@@ -392,6 +393,7 @@ from app.api.agent_credentials import router as credentials_router
 from app.api.agentbay_control import router as agentbay_control_router
 from app.api.okr import router as okr_router
 from app.api.onboarding import router as onboarding_router
+from app.api.agent_teams import router as agent_teams_router
 
 app.include_router(auth_router, prefix=settings.API_PREFIX)
 app.include_router(agents_router, prefix=settings.API_PREFIX)
@@ -438,6 +440,7 @@ app.include_router(credentials_router, prefix=settings.API_PREFIX)
 app.include_router(agentbay_control_router, prefix=settings.API_PREFIX)
 app.include_router(okr_router)  # OKR — self-prefixed at /api/okr
 app.include_router(onboarding_router, prefix=settings.API_PREFIX)
+app.include_router(agent_teams_router, prefix=settings.API_PREFIX)
 
 
 @app.get("/api/health", response_model=HealthResponse, tags=["health"])

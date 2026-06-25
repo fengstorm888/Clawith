@@ -1,6 +1,6 @@
 /** API service layer */
 
-import type { Agent, TokenResponse, User, Task, ChatMessage } from '../types';
+import type { Agent, TokenResponse, User, Task, ChatMessage, AgentTeam } from '../types';
 
 const API_BASE = '/api';
 
@@ -590,4 +590,38 @@ export const controlApi = {
 
     unlock: (agentId: string, data: { session_id: string; export_cookies?: boolean; platform_hint?: string }) =>
         request<any>(`/agents/${agentId}/control/unlock`, { method: 'POST', body: JSON.stringify(data) }),
+};
+
+// ─── Agent Teams ──────────────────────────────────────
+export const agentTeamApi = {
+    list: () => request<AgentTeam[]>('/agent-teams/'),
+
+    get: (id: string) => request<AgentTeam>(`/agent-teams/${id}`),
+
+    create: (data: any) =>
+        request<AgentTeam>('/agent-teams/', { method: 'POST', body: JSON.stringify(data) }),
+
+    update: (id: string, data: any) =>
+        request<AgentTeam>(`/agent-teams/${id}`, { method: 'PATCH', body: JSON.stringify(data) }),
+
+    delete: (id: string) =>
+        request<void>(`/agent-teams/${id}`, { method: 'DELETE' }),
+
+    addMember: (teamId: string, data: { agent_id: string; member_role?: string; sort_order?: number }) =>
+        request<any>(`/agent-teams/${teamId}/members`, { method: 'POST', body: JSON.stringify(data) }),
+
+    removeMember: (teamId: string, memberId: string) =>
+        request<void>(`/agent-teams/${teamId}/members/${memberId}`, { method: 'DELETE' }),
+
+    updateMember: (teamId: string, memberId: string, data: any) =>
+        request<any>(`/agent-teams/${teamId}/members/${memberId}`, { method: 'PATCH', body: JSON.stringify(data) }),
+
+    sessions: (teamId: string) =>
+        request<any[]>(`/agent-teams/${teamId}/sessions`),
+
+    createSession: (teamId: string) =>
+        request<any>(`/agent-teams/${teamId}/sessions`, { method: 'POST' }),
+
+    messages: (teamId: string, sessionId: string) =>
+        request<any[]>(`/agent-teams/${teamId}/sessions/${sessionId}/messages`),
 };

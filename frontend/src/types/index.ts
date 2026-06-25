@@ -91,3 +91,61 @@ export interface TokenResponse {
     user: User;
     needs_company_setup?: boolean;
 }
+
+// ── Agent Team ──
+
+export interface AgentTeamMember {
+    id: string;
+    team_id: string;
+    agent_id: string;
+    agent_name?: string;
+    agent_avatar_url?: string;
+    agent_role_description?: string;
+    agent_status?: string;
+    member_role: string;
+    sort_order: number;
+    is_active: boolean;
+    created_at: string;
+}
+
+export interface AgentTeam {
+    id: string;
+    name: string;
+    description: string;
+    avatar_url?: string;
+    coordinator_agent_id?: string;
+    creator_id: string;
+    creator_username?: string;
+    access_mode: string;
+    collaboration_mode: 'parallel' | 'sequential' | 'debate';
+    max_rounds: number;
+    welcome_message?: string;
+    status: string;
+    members: AgentTeamMember[];
+    created_at: string;
+    updated_at?: string;
+}
+
+export interface TeamSession {
+    id: string;
+    team_id: string;
+    user_id: string;
+    title: string;
+    last_message_at?: string;
+    created_at: string;
+}
+
+export interface TeamMessage {
+    id: string;
+    team_id: string;
+    session_id: string;
+    speaker_type: 'user' | 'expert' | 'coordinator' | 'system';
+    speaker_agent_id?: string;
+    speaker_name: string;
+    member_role?: string;
+    content: string;
+    thinking?: string;
+    round_number: number;
+    user_id?: string;
+    created_at: string;
+}

@@ -561,6 +561,96 @@ class GatewayHistoryItem(BaseModel):
     role: str  # "user" or "assistant"
     content: str
     sender_name: str | None = None
+
+
+# ─── Agent Team ─────────────────────────────────────────
+
+class AgentTeamMemberCreate(BaseModel):
+    agent_id: uuid.UUID
+    member_role: str = ""
+    sort_order: int = 0
+
+class AgentTeamMemberOut(BaseModel):
+    id: uuid.UUID
+    team_id: uuid.UUID
+    agent_id: uuid.UUID
+    agent_name: str | None = None
+    agent_avatar_url: str | None = None
+    agent_role_description: str | None = None
+    agent_status: str | None = None
+    member_role: str
+    sort_order: int
+    is_active: bool
+    created_at: datetime
+
+    model_config = {"from_attributes": True}
+
+class AgentTeamCreate(BaseModel):
+    name: str = Field(min_length=2, max_length=100, description="Team name, 2-100 characters")
+    description: str = ""
+    avatar_url: str | None = None
+    coordinator_agent_id: uuid.UUID | None = None
+    access_mode: str = "company"  # company | private | custom
+    collaboration_mode: str = "parallel"  # parallel | sequential | debate
+    max_rounds: int = 1
+    welcome_message: str | None = None
+    members: list[AgentTeamMemberCreate] = []
+
+class AgentTeamUpdate(BaseModel):
+    name: str | None = None
+    description: str | None = None
+    avatar_url: str | None = None
+    coordinator_agent_id: uuid.UUID | None = None
+    access_mode: str | None = None
+    collaboration_mode: str | None = None
+    max_rounds: int | None = None
+    welcome_message: str | None = None
+    status: str | None = None
+
+class AgentTeamOut(BaseModel):
+    id: uuid.UUID
+    name: str
+    description: str
+    avatar_url: str | None = None
+    coordinator_agent_id: uuid.UUID | None = None
+    creator_id: uuid.UUID
+    creator_username: str | None = None
+    access_mode: str
+    collaboration_mode: str
+    max_rounds: int
+    welcome_message: str | None = None
+    status: str
+    members: list[AgentTeamMemberOut] = []
+    created_at: datetime
+    updated_at: datetime | None = None
+
+    model_config = {"from_attributes": True}
+
+class AgentTeamSessionOut(BaseModel):
+    id: uuid.UUID
+    team_id: uuid.UUID
+    user_id: uuid.UUID
+    title: str
+    last_message_at: datetime | None = None
+    created_at: datetime
+
+    model_config = {"from_attributes": True}
+
+class AgentTeamMessageOut(BaseModel):
+    id: uuid.UUID
+    team_id: uuid.UUID
+    session_id: uuid.UUID
+    speaker_type: str
+    speaker_agent_id: uuid.UUID | None = None
+    speaker_name: str
+    member_role: str | None = None
+    content: str
+    thinking: str | None = None
+    round_number: int
+    user_id: uuid.UUID | None = None
+    created_at: datetime
+
+    model_config = {"from_attributes": True}
     created_at: datetime
 
 

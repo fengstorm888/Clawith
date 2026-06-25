@@ -359,3 +359,66 @@ def is_agent_expired(agent: Agent) -> bool:
     if expires_at and datetime.now(timezone.utc) > expires_at:
         return True
     return False
+
+
+# ── Agent Team permissions ──────────────────────────────
+
+def build_visible_teams_query(user: User, *, tenant_id: uuid.UUID | None = None):
+    """Build a query for agent teams visible to the current user.
+
+    Mirrors build_visible_agents_query: tenant isolation + access_mode.
+    """
+    from app.models.agent_team import AgentTeam
+
+    stmt = select(AgentTeam)
+    target_tenant_id = tenant_id if tenant_id is not None else user.tenant_id
+    if target_tenant_id is None:
+        return stmt.where(false())
+
+    if user.role in ("platform_admin", "org_admin"):
+        return stmt.where(
+            AgentTeam.tenant_id == target_tenant_id,
+            or_(
+                AgentTeam.creator_id == user.id,
+                AgentTeam.access_mode != "private",
+            ),
+        )
+
+    return stmt.where(
+        AgentTeam.tenant_id == target_tenant_id,
+        or_(
+            AgentTeam.creator_id == user.id,
+            AgentTeam.access_mode == "company",
+        ),
+    )
+
+
+async def check_team_access(db: AsyncSession, user: User, team_id: uuid.UUID) -> Tuple:
+    """Check if a user has access to a specific agent team.
+
+    Returns (team, access_level) where access_level is 'manage' or 'use'.
+    Raises HTTPException on not found / forbidden.
+    """
+    from app.models.agent_team import AgentTeam
+
+    result = await db.execute(select(AgentTeam).where(AgentTeam.id == team_id))
+    team = result.scalar_one_or_none()
+    if not team:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Team not found")
+
+    if team.tenant_id != user.tenant_id:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="No access to this team")
+
+    if team.creator_id == user.id:
+        return team, "manage"
+
+    access_mode = getattr(team, "access_mode", None) or "company"
+    is_admin = user.role in ("platform_admin", "org_admin")
+
+    if is_admin and access_mode != "private":
+        return team, "manage"
+
+    if access_mode == "company":
+        return team, "use"
+
+    raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="No access to this team")
