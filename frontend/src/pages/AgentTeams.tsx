@@ -61,7 +61,7 @@ export default function AgentTeams() {
             const agent = agents.find((a: Agent) => a.id === agentId);
             setCreateForm(f => ({
                 ...f,
-                selectedMembers: [...f.selectedMembers, { agent_id: agentId, member_role: agent?.role_description || '' }],
+                selectedMembers: [...f.selectedMembers, { agent_id: agentId, member_role: (agent?.role_description || '').slice(0, 100) }],
             }));
         }
     };

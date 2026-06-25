@@ -193,7 +193,7 @@ export default function AgentTeamDetail() {
                                                 <div style={{ fontSize: '12px', color: 'var(--text-tertiary)' }}>{a.role_description}</div>
                                             </div>
                                             <button
-                                                onClick={() => addMemberMutation.mutate({ agent_id: a.id, member_role: a.role_description })}
+                                                onClick={() => addMemberMutation.mutate({ agent_id: a.id, member_role: (a.role_description || '').slice(0, 100) })}
                                                 style={{
                                                     padding: '4px 12px', borderRadius: '6px', border: 'none',
                                                     background: 'var(--accent-primary, #4f46e5)', color: '#fff',
